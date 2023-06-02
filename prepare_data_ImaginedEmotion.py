@@ -66,7 +66,6 @@ class PrepareData:
         Returns the ID of the last epoch created.
         """
         raw = mne.io.read_raw_eeglab(raw_path, preload=True)
-        raw.resample(128)
         self._rename_press_events(raw)
         events, event_id = mne.events_from_annotations(
             raw=raw, regexp="|".join(self.selected_annotations)
