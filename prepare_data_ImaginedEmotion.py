@@ -31,7 +31,8 @@ class PrepareData:
     def _rename_press_events(self, raw: mne.io.Raw) -> None:
         annotations = raw.annotations
 
-        # Modify annotation names
+        # Modify annotation names, to add information about
+        # the emotion
         idx = 0
         while idx < len(annotations):
             desc = annotations.description[idx]
