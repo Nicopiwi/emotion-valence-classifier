@@ -29,7 +29,6 @@ class PrepareData:
         self.selected_annotations = {"press", "press1"}
 
     def _rename_press_events(self, raw: mne.io.Raw) -> None:
-        # Rename annotation names
         annotations = raw.annotations
 
         # Modify annotation names
