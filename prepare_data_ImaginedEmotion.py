@@ -1,9 +1,10 @@
-import mne 
+import mne
 import pickle
 import pandas as pd
 import argparse
 
-class PrepareData():
+
+class PrepareData:
     def __init__(self, args) -> None:
         self.args = args
         self.data_path = args.data_path
@@ -29,10 +30,11 @@ class PrepareData():
         self.selected_annotations = {"press", "press1"}
 
     def _rename_press_events(self, raw: mne.io.Raw) -> None:
-        # Rename annotation names
         annotations = raw.annotations
 
-        # Modify annotation names
+        # Modify annotation names, to add information about
+        # the emotion
+
         idx = 0
         while idx < len(annotations):
             desc = annotations.description[idx]
@@ -45,14 +47,25 @@ class PrepareData():
             else:
                 idx += 1
 
-    def run(self, to_df = True):
+        # Update the annotations
+        raw.set_annotations(annotations)
+
+    def run(self, to_df=True):
         if to_df:
             self.convert_all_files()
 
-
-    def set_to_df(self, raw_path, filename, tmin=-0.2, tmax=0.8, baseline=(-0.2, 0)):
+    def set_to_df(
+        self,
+        raw_path,
+        filename,
+        tmin=-0.5,
+        tmax=2,
+        baseline=(-0.5, 0),
+        initial_epoch_id=0,
+    ) -> int:
         """
-        Convert a single .set file to pandas df and save it to a pickle format
+        Convert a single .set file to pandas df and save it to a pickle format.
+        Returns the ID of the last epoch created.
         """
         raw = mne.io.read_raw_eeglab(raw_path, preload=True)
         self._rename_press_events(raw)
@@ -67,7 +80,6 @@ class PrepareData():
             tmax=tmax,
             baseline=baseline,
         )
-        print(epochs.get_data().shape)
 
         if self.spectrum == "power":
             epochs = epochs.compute_psd()
@@ -80,17 +92,20 @@ class PrepareData():
         df.drop(["condition"], axis=1, inplace=True)
 
         filename = self.export_path + filename
-        df.to_pickle(filename + '.pkl')
+        df.to_pickle(filename + ".pkl")
         del raw
-    
+
+        return df.iloc[-1]["epoch"]
+
     def convert_all_files(self):
         """
-        Convert all files from EEGLAB into dataframe format in order to facilitate
-        further modeling tasks
+        Convert all files from EEGLAB into dataframe format in order to
+        facilitate further modeling tasks
         """
         dataset_directory_path = self.data_path
-        
-        for i in range(1, self.args.subjects_numbers+1):
+        initial_epoch_id = 0
+
+        for i in range(1, self.args.subjects_numbers + 1):
             try:
                 raw_path = (
                     dataset_directory_path
@@ -102,12 +117,11 @@ class PrepareData():
                     raw_path, filename, initial_epoch_id=initial_epoch_id
                 ) + 1
             except (RuntimeError, TypeError, NameError, FileNotFoundError):
-                print(f'sub-{i:02d} file has an error')
+                print(f"sub-{i:02d} file has an error")
                 pass
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     ######## Data ########
     parser.add_argument("--dataset", type=str, default="ImaginedEmotion")
@@ -131,8 +145,5 @@ if __name__ == '__main__':
     )
 
     args = parser.parse_args()
-    
+
     PrepareData(args).run()
-
-  
-
