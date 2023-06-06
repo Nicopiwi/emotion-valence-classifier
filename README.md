@@ -21,7 +21,8 @@ We first identified the emotions present in our dataset, enabling us to isolate 
 - Two notebooks with the model implementation
 
 **Notes**
-- In order to replicalte the results, download the dataset from OpenNeuro and put it into './dataset/' directory and then create a preprocessed_data directory so that the preprocessed data can be saved into that path. 
+- In order to replicalte the results, download the dataset from OpenNeuro and put it into `./dataset/` directory and then create a preprocessed_data directory so that the preprocessed data can be saved into that path. 
+- Please download the EEGNet Model implementation and pretrained weights from this [https://github.com/vlawhern/arl-eegmodels/tree/master](link).
 - 
 
 
